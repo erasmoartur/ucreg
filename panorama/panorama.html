@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html style="background: rgb(250,252,255);"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Regression Query</title>
+
+    <script src="./files/d3.v3.js"></script>
+	<script src="./files/component-utils.js"></script>
+	<script src="./files/tooltip-component.js"></script>
+	<script src="./files/jquery-1.8.2.js"></script>
+	<script src="./files/jquery-ui.js"></script>
+	<script src="./files/jquery.csv.js"></script>
+	<script src="./files/graphs.js"></script>
+	<script src="./files/streamgraph.js"></script>
+	<script src="./files/pearson-correlation.js"></script>
+    <link rel="stylesheet" type="text/css" href="./files/style.css">
+		<style>
+			
+			text {
+				text-rendering: optimize-legibility;
+			}
+			.container,
+			.list-container {
+			   
+			}
+			.odds{
+				margin-top: 48px;
+				width: 32.5%;
+				height: 350px;
+				float: left;
+				border: 2px solid gray;
+				border-radius: 5px;
+				background-color: rgb(245,249,249);
+				box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+			}
+			.streamgraph{
+				position: relative;
+				margin-top: 6px;
+				width: 99.7%;
+				height: 140px;
+				float: left;
+				border: 2px solid gray;
+				border-radius: 5px;
+				background-color: rgb(245,249,249);
+				box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+			}
+			.states{
+				position: relative;
+				margin-top: 6px;
+				width: 99.5%;
+				height: 220px;
+				float: left;
+				border: 2px solid gray;
+				border-radius: 5px;
+				background-color: rgb(245,249,249);
+				box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+			}
+			.dissimilarity{
+				position: relative;
+				margin-top: 6px;
+				width: 99.5%;
+				height: 220px;
+				float: left;
+				border: 2px solid gray;
+				border-radius: 5px;
+				background-color: rgb(245,249,249);
+				box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+			}
+			.alertmenu{
+				position: absolute;
+				left: 30%;
+				padding-top: 50px;
+				
+				animation-name: alertanim;
+				animation-duration: 0.5s;
+				animation-timing-function:ease-in-out;
+				animation-iteration-count: infinite;
+				animation-direction: alternate;
+			}  
+			.list-container {
+				padding-top: 50px;
+			}        
+			.list {
+			}
+			.state {
+				font-weight: bold;
+				font-size: 1.2em;
+			}
+			.slider{
+				width: 75%;
+			}
+			#upperBar{
+				position: absolute;
+				width: 99%;
+				height: 40px;
+				border-radius: 6px;
+				background-color: rgb(90,100,110);
+				border: 2px black;
+				font-size: 0.6em;
+				text-indent: 10px;
+				letter-spacing: 2px;
+				color: rgb(245,245,245);
+				box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+			}
+			#upperBar:hover{
+				background-color: rgb(100,110,120);
+			}
+			#upperBar:hover > .input{
+				top: 45px;
+			}
+
+			.input{
+				position: absolute;
+				padding-top: 2px;
+				padding-right: 4px;
+				padding-bottom: 2px;
+				padding-left: 4px;
+				top: -120px;
+				font-size: 0.9em;
+				text-indent: 0px;
+				letter-spacing: 0px;
+				background-color: rgb(245,249,249);
+				color: rgb(0,0,0);
+				border: 2px solid gray;
+				border-radius: 5px;
+				height: 54px;
+				width: 99.2%;
+				transition: all 0.4s ease-in-out;
+			}
+
+			
+			table {
+				position: relative;
+				font-family: arial, sans-serif;
+				border-collapse: collapse;
+				font-size: 0.6em;
+				width: 98%;
+				left: 1%;
+				top: 0%;
+			}
+
+			td, th {
+				border: 1px solid #dddddd;
+				text-align: left;
+				padding: 2px;
+			}
+			tr:nth-child(even) {
+				background-color: #dddddd;
+			}
+			.table-1 tr:hover {
+				background: #1B75BB;
+			}
+			.selected{
+				background: #1B75BB !important;
+			}
+			
+			@keyframes alertanim{
+			  from {opacity: 0.5;top:0px;}
+			  to {opacity: 1;top:10px;}
+			}
+
+    </style>
+</head>
+<body>
+	<div id='oddsGraphs'>
+	</div>
+	<div class="states" id='states'>
+		<p style=" font: 15px arial, sans-serif;text-align: center;margin-top:0px;margin-bottom:0px">Case History</p>
+		<table id='historicTable' class="table-1">
+			<tr id='tableStates'></tr>
+		</table>
+		<input type="button" id="animate" value="Play" style="width: 60px; position:absolute;bottom:3px;left:46%">
+	</div>
+	<div class="dissimilarity" id='dissimilarity'>
+		<p style=" font: 15px arial, sans-serif;text-align: center;margin-top:0px;margin-bottom:0px">Similar Cases</p>
+		<table id='similarityTable'>
+			<tr id='tableDiss'></tr>
+		</table>
+	</div>
+	<div id='streamsG'></div>
+	<div id="upperBar" class="upperBar">
+		<h1>Regression Analysis</h1>
+		<div class="input" id="input">			
+			
+			<fieldset id="openfile1" style="width:250px;height:38px; float: left;">
+				<legend>Open file (regression data):</legend>
+				<input type="file" id="files" style="width:99%;font-size:10px;" name="files[]"/>
+			</fieldset>	
+			<fieldset id="openfile2" style="width:250px;height:38px; float: left;">
+				<legend>Open file (original raw data):</legend>
+				<input type="file" id="datafile" style="width:99%;font-size:10px;" name="files[]"/>
+			</fieldset>	
+			<div id='inputAttribs'></div>
+			<fieldset style="width:55px; height:32px;float:left;">
+			<legend>Submit all:</legend>
+				<input type="button" id="submit" value="Submit" style="width: 100px;">
+			</fieldset>
+		</div>
+		<div class='alertmenu' id='alertmenu'>
+			<img src="./interface/alert.png" style="height:60px;"/>
+		</div>
+	</div>
+	
+	
+<script>
+
+///////////////////////////////////// Global variables
+	var graphs = [];
+	var streamG = [];
+	var labelSet = [];
+	var deathArray = [];
+	var firstrun = true;
+	var rts=3;
+	var rr=16;
+	var niss=17;
+	var age=60;
+	var surgery = 0;
+	var _1iss = 6;
+	var ind_externa1 = 2;
+	var ind_extremity1 = 0;
+	var complication = 0;
+	var ind_head1 = 6;
+	var ind_head3 = 3;
+	var class_glasgow = 14;
+	var inter_days = 0;
+	var thorax1 = 0;
+	var abdomen1 = 0;
+	var pas = 120;
+	var bloodtp = 0;
+	var ccp = 0;
+	var data_ = [];
+	var currentIDX = [];
+	var idxData = [];
+	var correlRank = [];
+	var loadData = false;
+	var rData = 0;
+	var charts = 0;
+	var coeffs = 0;
+	var tittles = 0;
+	var targets = 0;
+	var uniqueTargets = 0;
+	var oddsHTML = '';
+	var uniquesDims = [];
+	var textData = [];
+
+/////////////////////////////////// Util functions
+	function onlyUnique(value, index, self) { 
+		return self.indexOf(value) === index;
+	}
+
+
+////////////////////////////////// Open file and load regression data
+//	rData = readTextFile('file:///C:/Users/erasm/Dropbox/Erasmo-Dinter/RegressionPanorama/Beta/regressionData.xml');
+//	processData(rData);
+	
+	$(document).ready(function() {
+			if(isAPIAvailable()) {
+				$('#files').bind('change', handleFileSelect);
+				$('#datafile').bind('change', openDataFile);
+			}
+	});
+	
+	function isAPIAvailable() {
+		  if (window.File && window.FileReader && window.FileList && window.Blob) {
+			return true;
+		  } else {
+			document.writeln('The HTML5 APIs used in this form are only available in the following browsers:<br />');
+			document.writeln(' - Google Chrome: 13.0 or later<br />');
+			document.writeln(' - Mozilla Firefox: 6.0 or later<br />');
+			document.writeln(' - Internet Explorer: Not supported (partial support expected in 10.0)<br />');
+			document.writeln(' - Safari: Not supported<br />');
+			document.writeln(' - Opera: Not supported');
+			return false;
+		  }
+    }
+	
+	function handleFileSelect(evt) {
+      var files = evt.target.files; // FileList object
+      var file = files[0];
+      printTable(file);
+    }
+	
+	function openDataFile(evt) {
+      var files = evt.target.files; // FileList object
+      var file = files[0];
+      openTable(file);
+    }
+	
+	function openTable(file) {
+      var reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function(event){
+        var csv = event.target.result;
+		var data = $.csv.toArrays(csv);
+		var kys = data[0];
+		data.splice(0,1);
+		data_ = toObject(data, kys);
+		document.getElementById('openfile2').style.position = 'absolute';
+		document.getElementById('openfile2').style.visibility = 'hidden';
+		loadData = true;
+		initialValues(data_);
+		}
+	}
+	
+	function initialValues(data){
+		var uniquesSums = [].fill.call({length:uniquesDims.length },0);;
+		
+		for (var i=0; i<uniquesDims.length; i++)
+			for (var j=0; j<data.length; j++)
+				uniquesSums[i] += Number(data[j][uniquesDims[i]]);
+			
+			
+		for (var i=0; i<uniquesDims.length; i++)
+				document.getElementById(uniquesDims[i].replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'')).value = (uniquesSums[i]/data.length).toFixed(2);;
+	
+	}
+	
+	function toObject(data, keys) {
+		var i = 0, k = 0,
+			obj = null,
+			output = [];
+		for (i = 0; i < data.length; i++) {
+			obj = {};
+
+			for (k = 0; k < keys.length; k++) {				
+				obj[keys[k]] = data[i][k];
+			}
+			output.push(obj);
+		}
+		return output;
+	}
+	
+	
+    function printTable(file) {
+      var reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function(event){
+        var data = event.target.result;
+        processData(data);
+		BuildHTML();
+		document.getElementById('openfile1').style.position = 'absolute';
+		document.getElementById('openfile1').style.visibility = 'hidden';
+		}
+	}
+
+////////////////////////////////// Bulding the HTML	
+	function BuildHTML(){
+		if (charts.dimensions.length == 1){
+			oddsHTML += "<div class='odds' id='odds1' style='width:30%;height:65.6vh'>";
+			oddsHTML += "<div class='container0'></div>";	
+			oddsHTML += "</div>";	
+		}
+		else{
+			for (var i=0;i<charts.dimensions.length;i++){
+				if (i>0)
+					oddsHTML += "<div class='odds' style='margin-left: 0.6%;width:"+(97/charts.dimensions.length)+"%;'>";
+				else
+					oddsHTML += "<div class='odds' id='odds1' style='width:"+(97/charts.dimensions.length)+"% ;'>";
+				oddsHTML += "<div class='container"+i+"'></div>";	
+				oddsHTML += "</div>";
+			}		
+		}
+		document.getElementById('oddsGraphs').innerHTML = oddsHTML;
+
+		oddsHTML = '';
+
+		if (charts.dimensions.length == 1){
+			oddsHTML += "<div class='streamgraph'>";
+			oddsHTML += "<div class='containerstrem0' style='height:22vh;'></div>";	
+			oddsHTML += "</div>";
+			
+			document.getElementById('states').style.width = '69%';
+			document.getElementById('states').style.height = '30.7vh';
+			document.getElementById('states').style["margin-top"]='48px';
+			document.getElementById('states').style.float = 'right';
+			document.getElementById('dissimilarity').style.width = '69%';
+			document.getElementById('dissimilarity').style.height = '33.7vh';
+			document.getElementById('dissimilarity').style.float = 'right';
+		
+		}
+		else{
+			for (var i=0;i<charts.dimensions.length;i++){
+				oddsHTML += "<div class='streamgraph'>";
+				oddsHTML += "<div class='containerstrem"+i+"'></div>";	
+				oddsHTML += "</div>";
+
+			}
+		}
+		document.getElementById('streamsG').innerHTML = oddsHTML;
+		
+		//input set up
+		
+		oddsHTML = '';
+		
+		for (var i=0;i<charts.dimensions.length;i++)
+			for (var j=0;j<charts.dimensions[i].length;j++)
+				if (!(uniquesDims.indexOf(charts.dimensions[i][j]) > -1))
+					uniquesDims.push(charts.dimensions[i][j]);
+					
+		
+		for (var i=0;i<uniquesDims.length;i++){
+			oddsHTML += "<fieldset style='width:70px; height:38px;float:left;'>";
+			oddsHTML += "<legend>"+uniquesDims[i]+"</legend>";
+			oddsHTML += "<input type='number' id='"+(uniquesDims[i].replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,''))+"' name="+uniquesDims[i]+" step='0.1' value='1' style='width:48px;'>";
+			oddsHTML += "</fieldset>";
+		}
+		document.getElementById('inputAttribs').innerHTML = oddsHTML;
+		
+		if (uniquesDims.length>13)
+			document.getElementById('input').style.height = '100px';
+
+		
+		uniqueTargets = targets.filter(onlyUnique);
+		
+		oddsHTML = '';
+		// set up table of states
+		for (var i=0;i<uniquesDims.length;i++)
+			oddsHTML += "<th id='-1'>"+uniquesDims[i]+"</th>";	
+		
+		document.getElementById('tableStates').innerHTML = oddsHTML;
+		
+		for (var i=0;i<uniqueTargets.length;i++)
+			oddsHTML += "<th  id='-1'>"+uniqueTargets[i]+"</th>";	
+			
+		document.getElementById('tableDiss').innerHTML = oddsHTML;
+		
+	for (var i=0;i<uniquesDims.length;i++){
+		document.getElementById(uniquesDims[i].replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'')).onchange = function (){
+		currentIDX = oddsCalc();
+		for (var j=0;j<charts.dimensions.length;j++)
+			graphs[j].updatePartitions(currentIDX[j]);		
+		}
+	};
+		
+	}	
+	
+	//BuildHTML();
+	
+///////////////////////////////////////////////////////////////////////////
+
+/*
+function readTextFile(file)				// open local file (only works with firefox without beeing a server)
+{
+    var rawFile = new XMLHttpRequest();
+	var allText;
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                allText = rawFile.responseText;
+               // alert(allText);
+            }
+        }
+    }
+    rawFile.send(null);
+	return allText;
+}*/
+
+function processData(text){
+	coeffs = $.parseJSON($(text).find("coeffs").text());
+	charts = $.parseJSON($(text).find("chart").text());
+	labelSet = $.parseJSON($(text).find("labels").text());
+	targets = $.parseJSON($(text).find("targets").text());
+	tittles = $.parseJSON($(text).find("tittles").text());
+}
+
+
+	
+	document.getElementById("historicTable").addEventListener("mouseover",function(e) {
+		var idx = Number(e.target.id);
+		if (idx>=0){
+			for (var i=0;i<charts.dimensions.length;i++)
+				graphs[i].updatePartitions(idxData[idx][i]);		
+			}
+    });
+	
+	document.getElementById("historicTable").addEventListener("mouseout",function(e) {
+		for (var i=0;i<charts.dimensions.length;i++)
+			graphs[i].updatePartitionsSoftly(currentIDX[i]);
+
+	});
+	
+	
+	function oddsCalc(){			// applying the multinomial regrassion with the previous calc coeffs
+	var exp = [];
+	var probs = [];
+	var part = [];
+		for (var i=0;i<charts.dimensions.length;i++){
+			exp[i] = [];
+			for (var j=0;j<labelSet[i].length;j++){
+				var sum = coeffs[i][j][0][0];
+				for (var k=1;k<coeffs[i][j][0].length;k++){
+					var Xi = document.getElementById((charts.dimensions[i][k-1]).replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'')).value;
+					sum += coeffs[i][j][0][k]*Xi;				
+				}
+				exp[i][j]=Math.exp(sum);			
+			}
+			
+			//probabilities
+			probs[i] = [];
+			
+			//denominator
+			var denominator = 1;
+			for (var j=1;j<labelSet[i].length;j++)
+				denominator += exp[i][j];
+			
+			for (var j=0;j<labelSet[i].length;j++){
+				if (j==0) //pivot
+					probs[i][j] = 1/denominator;
+				else{
+					probs[i][j] = exp[i][j]/denominator;				
+				}
+							
+			}
+			
+			// chart set up
+			part[i] = [];
+			var othersProb = 0;
+			for (var j=0;j<labelSet[i].length;j++){
+				if (charts.labels[i].includes(labelSet[i][j]))
+					part[i].push({partition:Math.round(probs[i][j]*1000)/10,label:labelSet[i][j]});
+				else
+					othersProb += probs[i][j];			
+			}
+			part[i].push({partition:Math.round(othersProb*1000)/10,label:'Others'});
+
+			
+		}
+		return part;	
+	};
+	
+	function playAnim(i){
+		if (i<idxData.length){
+			
+			for (var j=0;j<charts.dimensions.length;j++)			
+				graphs[j].updatePartitionsSeq(idxData[i][j],i);
+
+			
+			var table = document.getElementById("historicTable");		
+		
+			for (var ind=1;ind<table.rows.length;ind++)			//cleaning rows marked as selected
+				if ((table.rows[ind].classList)=="selected")
+					table.rows[ind].classList.toggle("selected");
+			
+			table.rows[i+1].classList.toggle("selected");		//defining a new selected
+			
+		} else{
+			var table = document.getElementById("historicTable");			
+			for (var ind=1;ind<table.rows.length;ind++)			//cleaning rows marked as selected
+				if ((table.rows[ind].classList)=="selected")
+					table.rows[ind].classList.toggle("selected");
+		
+		}
+	}
+		
+	document.getElementById("animate").onclick = function (){
+		playAnim(0);			
+	}
+	
+	function correlationRank(){
+		var _actualItem = [];
+		var _currentItem = [];
+		
+		for (var i=0;i<uniquesDims.length;i++)
+			_actualItem.push(document.getElementById(uniquesDims[i].replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'')).value);
+			
+			
+				
+		for (var i=0;i<data_.length;i++){
+			_currentItem = [];
+			for (var j=0;j<uniquesDims.length;j++)
+			_currentItem.push(data_[i][uniquesDims[j]]);
+			//_currentItem.push(data_[i][uniquesDims[j]]=="NULL"?0:data_[i][uniquesDims[j]]);
+			
+			correlRank[i] = {correl:getPearsonCorrelation(_actualItem,_currentItem),pos:i};
+		}
+		correlRank.sort(function(a, b) {			// sorting by bigger correlations
+			return parseFloat(b.correl) - parseFloat(a.correl);
+		});
+		var readkey = 10;
+	}
+	
+	//Convert object to data array
+	function convertOBJtoData(dta){
+		var dataOutput = [];
+		for (var i=0; i<dta[0].length; i++) dataOutput[i] = [];		
+		
+		for (var i=0; i<dta.length; i++){						
+			for (var j=0; j<dta[i].length; j++){
+					for (var l=0; l<dta[i][j].length; l++){
+						dataOutput[j].push({key:dta[i][j][l].label,value:dta[i][j][l].partition,date:i});					
+					}
+				}
+			}
+		return dataOutput;
+	}
+	
+document.getElementById("upperBar").onmouseenter = function(){
+	document.getElementById('alertmenu').style.visibility = 'hidden';
+
+}	
+	
+document.getElementById("submit").onclick = function (){
+	var table = document.getElementById("historicTable");
+	var similarTable =  document.getElementById("similarityTable");
+	currentIDX = oddsCalc();
+	idxData.push(currentIDX);
+	var streamData = convertOBJtoData(idxData);
+	if (loadData)
+		correlationRank();
+	
+	// historic table update
+	oddsHTML = '';
+	for (var i=0;i<uniquesDims.length;i++)
+		oddsHTML += '<td id='+(table.rows.length-1)+'>'+document.getElementById(uniquesDims[i].replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'')).value+'</td>';
+	table.insertRow(table.rows.length).innerHTML = oddsHTML;
+	
+	// correl table update
+	if (loadData){
+		oddsHTML = '';
+		for (var i=0;i<uniquesDims.length;i++)
+			oddsHTML += '<td id='+(similarTable.rows.length-2)+'>'+data_[correlRank[i].pos][uniquesDims[i]]+'</td>';
+			
+			
+		
+		if (similarTable.rows.length < 10)
+			for (var i=0;i<10;i++){
+				oddsHTML = '';
+				for (var j=0;j<uniquesDims.length;j++)
+					oddsHTML += '<td id='+(similarTable.rows.length-2)+'>'+data_[correlRank[i].pos][uniquesDims[j]]+'</td>';
+				for (var j=0;j<uniqueTargets.length;j++)
+					oddsHTML += '<td id='+(similarTable.rows.length-2)+'>'+data_[correlRank[i].pos][uniqueTargets[j]]+'</td>';
+				similarTable.insertRow(i+1).innerHTML=oddsHTML;			
+				}			
+		else
+			for (var i=0;i<10;i++){
+				oddsHTML = '';
+				for (var j=0;j<uniquesDims.length;j++)
+					oddsHTML += '<td id='+(similarTable.rows.length-2)+'>'+data_[correlRank[i].pos][uniquesDims[j]]+'</td>';
+				for (var j=0;j<uniqueTargets.length;j++)
+					oddsHTML += '<td id='+(similarTable.rows.length-2)+'>'+data_[correlRank[i].pos][uniqueTargets[j]]+'</td>';
+				similarTable.rows[i+1].innerHTML = oddsHTML;			
+				}
+	}
+			
+	if (firstrun){
+				
+		firstrun = false;
+		//var margin = (document.getElementById('odds1').clientWidth - 433)/2;
+		var marginL = -67.5*charts.dimensions.length + 185;
+		var marginT = 20;
+		var resRatio = (document.getElementsByTagName("BODY")[0].clientWidth/1300);
+		if (charts.dimensions.length == 1) {marginL = -150+100*resRatio;marginT = 50*resRatio;}
+		
+		for (var i=0;i<charts.dimensions.length;i++){
+			graphs[i] = graphComponent()				// Preparing to render curves
+					.config({
+						el: document.querySelector('.container'+i),
+						marginLeft: marginL,
+						marginTop: marginT,
+						zoomFactor: 1,
+					});		
+			streamG[i] = streamComponent()				// Preparing to render curves
+					.config({
+						el: document.querySelector('.containerstrem'+i),
+					});		
+		}
+
+		for (var i=0;i<charts.dimensions.length;i++)
+			graphs[i].render(currentIDX[i], tittles[i], true, i);	
+		
+	}
+	else{
+		for (var i=0;i<charts.dimensions.length;i++)
+			streamG[i].chart(streamData[i], "orange", i, tittles[i]+' Evolution');
+
+	
+	}
+}
+	
+</script>
+
+
+
+
+</body></html>
