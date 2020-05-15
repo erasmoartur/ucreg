@@ -1,0 +1,47 @@
+age-range
+
+0 -> 0-9
+1 -> 10-19
+2 -> 20-29
+3 -> 30-39
+4 -> 40-49
+5 -> 50-59
+6 -> 60-69
+7 -> 70-79
+8 -> >80
+
+Hypertension
+0 -> No
+1 -> Yes
+
+Diabetes
+0 -> No
+1 -> Yes
+
+Coronary heart disease
+0 -> No
+1 -> Yes
+
+Gasp
+0 -> No
+1 -> Yes
+
+Shortness of breath
+0 -> No
+1 -> Yes
+
+Expectorarion
+0 -> No
+1 -> Yes
+
+Cough
+0 -> No
+1 -> Yes
+
+Chest distress
+0 -> No
+1 -> Yes
+
+Fatigue
+0 -> No
+1 -> Yes
