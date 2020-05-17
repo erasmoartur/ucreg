@@ -27,7 +27,7 @@ The tool includes the following aspects:
 
 ### The interface
 
-![Screen of the interface](https://raw.githubusercontent.com/erasmoartur/lrxptool/master/imgs/screen_interface.png?raw=true)
+![Screen of the interface](https://raw.githubusercontent.com/erasmoartur/lrxptool/master/imgs/screen_interface.png)
 
 * _(a)_ File opener
 * _(b)_ Target attribute selection
