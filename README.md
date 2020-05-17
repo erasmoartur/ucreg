@@ -4,8 +4,8 @@ This tool applies the potential of Attribute-RadViz in identifying correlations 
 The tool includes the following aspects:
 * feature selection,
 * regression model construction,
-* evaluating binary and multinomial regression, and 
-* constructing a panorama for queries over the model.
+* evaluation of binary and multinomial regression, and 
+* construction of a panorama for queries over the model.
 
 ## Authors:
 
