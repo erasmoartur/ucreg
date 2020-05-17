@@ -9,7 +9,7 @@ The tool includes the following aspects:
 
 ## Authors:
 
-  * Erasmo Artur (USP)\
+  * Erasmo Artur (USP)
   * Rosane Minghim (UCC)
 
 ## Installing and running
