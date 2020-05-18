@@ -31,27 +31,21 @@ The tool includes the following aspects:
 
 * _(a)_ File opener
 * _(b)_ Target attribute selection
-* _(c)_ Define the number of top correlated attributes simultaneously selected when right-clicking over a DA
-* _(d)_ Adjust the size of the elements
-* _(e)_ Adjust the opacity of the elements
-* _(f)_ Adjust the strength of RadViz links
-* _(g)_ Adjust the repelling force of the elements (to avoid overlapping)
-* _(h)_ Enable/disable visual widgets of the tool (can increase performance)
-* _(i)_ Choose the visualization technique for the second view
-* _(j)_ Choose an identifier to name the elements in the second view 
-* _(k)_ Choose the bound box action in the second view:
-  * Show values: Show a table with all values of the selected items
-  * Refine: Rebuilds the correlation matrix with only the selected items
-* _(l)_ Restart the view
-* _(m)_ Enable/disable auto ordering and auto-align
-* _(n)_ Define the sample size for the view 
-* _(o)_ Define the options to export the current selection
-* _(p)_ Define the t-SNE parameters
-* _(q)_ Enable/disable the bars in the second view
-* _(r)_ Show the silhouette values for:
-  * Original data
-  * Selected data
-  * Selected and projected (RadViz) data
-* _(u)_ Search attributes by name
-* _(s)_ Refresh the second view
-* _(t)_ Search items by name
+* _(c)_ Adjust the size of the elements
+* _(d)_ Adjust the opacity of the elements
+* _(e)_ Adjust the strength of RadViz links
+* _(f)_ Adjust the repelling force of the elements (to avoid overlapping)
+* _(g)_ Enable/disable visual widgets of the tool (can increase performance)
+  * Information bars: Hide/Show all informations bars
+  * Borders of nodes: Hide/Show the borders of the mapped elements
+  * Links lines: Hide/Show between DAs and mapped elements
+  * Word cloud:  Hide/Show a word cloud when hovering DAs
+  * Correlation between attributes: Dynamically changes sizes of elements according to the correlation to the hovered one.
+* _(h)_ Choose the evaluation mode in the second view
+* _(i)_ Plot some attribute of the data set directly to the ROC
+* _(j)_ Choose the discretization of the ROC curve
+* _(k)_ Choose the confindence of the LR model
+* _(l)_ Choose the attribute used in to identify mapped items by the tooltip
+* _(m)_ Define the sample size for the view 
+* _(n)_ Define the opacity of the elements
+* _(o)_ Adjust the repelling force of the elements (to avoid overlapping)
