@@ -28,6 +28,7 @@
 		<style>
 		body {
 				overflow: hidden;
+				
 			}
 			.item {
 				border: 2px solid white;
@@ -160,7 +161,7 @@
 				top: -100px;
 				font-size: 0.7em;
 				background-color: rgb(224,236,238);
-				height:480px;
+				height:520px;
 				width: 200px;
 				transition: all 0.4s ease-in-out;
 				box-shadow: -3px 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
@@ -482,6 +483,11 @@
 				<div class="slider">
 					<input type="range" name="collisionSlider" id="collision_r" value="2" step="0.1" min="0" max="5" style="width:150px;">
 				</div>
+			</fieldset>
+			<fieldset style="width:170px;height:35px;float:left;">		
+			<legend>Open:</legend>
+				<input type="button" id="openPanorama" value="Panorama" style="width:80px;font-size:10px;">
+				<input type="button" id="openLorrviz" value="LoRRViz" style="width:80px;font-size:10px;">
 			</fieldset>
 		</div>
 	</div>
@@ -1188,6 +1194,13 @@
 		window.open('./panorama/panorama.html');
 	}
 	
+	document.getElementById("openPanorama").onclick = function (){
+		window.open('./panorama/panorama.html');
+	}
+	
+	document.getElementById("openLorrviz").onclick = function (){
+		window.open('./lorrviz/lorrviz.html');
+	}
 	
 	
 	
