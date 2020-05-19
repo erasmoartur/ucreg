@@ -1,0 +1,664 @@
+﻿<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>LoRRViz</title>
+	<script src="./files/d3.v4.min.js"></script>
+	<script src="./files/d3-selection-multi.v0.4.min.js"></script>
+	<script src="./files/jquery-1.8.2.js"></script>
+	<script src="./files/jquery-ui.js"></script>
+	<script src="./files/jquery.csv.js"></script>
+	<script src="./files/radviz-regular.js"></script>
+	<script src="./files/component-utils.js"></script>
+	<script src="./files/tooltip-component.js"></script>
+	<link rel="stylesheet" type="text/css" href="./files/style.css">
+<style>
+	body{
+			overflow: hidden;
+			background-color: rgb(245,249,249);
+		}
+	.radviz{
+			width: 49.5%;
+			height: 98vh;
+			float: left;
+			border: 2px solid gray;
+			border-radius: 5px;
+			background-color: rgb(245,249,249);
+			transition: all 0.4s ease-in-out;
+			box-shadow: 3px 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+		}
+	#iconbar{
+			left: 0px;
+			position: absolute;
+			padding-top: 2px;
+			padding-right: 4px;
+			padding-bottom: 2px;
+			padding-left: 4px;
+			top: 30%;
+			background-color: rgb(224,236,238);
+			border: 2px solid gray;
+			border-radius: 5px;
+			height: 264px;
+			width: 24px;
+			box-shadow: 3px 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);			
+		}
+		#iconbar:hover{
+			background-color: rgb(201,212,214);	
+		}
+		#iconbar:hover > .input{
+			left: 36px;		
+		}
+		.input{
+			left: -300px;
+			position: absolute;
+			padding-top: 2px;
+			padding-right: 4px;
+			padding-bottom: 2px;
+			padding-left: 4px;
+			top: -80px;
+			font-size: 0.7em;
+			background-color: rgb(224,236,238);
+			height: 460px;
+			width: 200px;
+			transition: all 0.4s ease-in-out;
+			box-shadow: 3px 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+		}
+		.button{
+			background-color: rgb(90,100,110);
+			border: none;
+			border-radius: 5px;
+			color: rgb(230,230,230);
+			padding: 2px 5px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 16px;
+			margin: 0px 0px;
+			cursor: pointer;
+			-webkit-transition-duration: 0.4s; /* Safari */
+			transition-duration: 0.4s;
+			box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+		}
+		.slider{
+				width: 75%;
+		}
+		.sampleQuery{
+			width: 90%;
+			height: 0px;
+			position: absolute;
+			float: left;
+			left: 5%;
+			top: 5vh;
+			border: 2px solid gray;
+			border-radius: 5px;
+			background-color: rgb(245,249,249);
+			transition: all 0.4s ease-in-out;
+			opacity: 1;
+			visibility: hidden;
+			overflow: auto;
+			box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 3px 5px 0 rgba(0,0,0,0.19);
+		}
+		table {
+			position: relative;
+			font-family: arial, sans-serif;
+			border-collapse: collapse;
+			font-size: 0.6em;
+			width: 98%;
+			left: 1%;
+			top: 0%;
+		}
+		td, th {
+			border: 1px solid #dddddd;
+			text-align: left;
+			padding: 2px;
+		}
+		tr:nth-child(even) {
+			background-color: #dddddd;
+		}
+		.table-1 tr:hover {
+			background: #1B75BB;
+		}
+		.black{
+			background-color: rgb(0,0,0);
+			width: 105%;
+			height: 105vh;
+			position: absolute;
+			left: -5px;
+			top: -5px;
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.4s ease-in-out;
+		}
+</style>
+</head>
+<body>
+	<div id="radvizdiv" class="radviz">
+		<input type="button" class="button" id="atSearch" value="Search" style="width: 100px;position:absolute;left:1%;bottom:10px;">
+		<div class="container" id="container"></div>
+		<div class="attribSearch" style="visibility:hidden;">
+			<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for attributes.." style="width:96%;font-size:10px;">
+			<ul id="myUL">
+			</ul>
+			<input type="button" id="atSearchClose" value="Close" style="width: 100%;">
+		</div>
+	</div>
+	<div id="iconbar">
+		<img src="./interface/menubar01.png" style="height:264px;"/>
+		<div class="input">
+		<fieldset style="width:170px;height:38px; float: left;">
+			<legend>LR data file:</legend>
+			<input type="file" id="lrdata" style="width:90%;font-size:10px;" name="files[]"/>
+		</fieldset>
+		<fieldset style="width:170px;height:38px; float: left;">
+			<legend>CSV file:</legend>
+			<input type="file" id="files" style="width:90%;font-size:10px;" name="files[]"/>
+		</fieldset>
+		<fieldset style="width:170px;height:38px; float: left;">
+			<legend>Names:</legend>
+			<form id="nameForm">
+			<select name="atrs" id="selname" style="width:90%;font-size:10px;">
+			<option>Select here</option>
+		</select>
+		</form>
+		</fieldset>
+		<fieldset style="width:170px;height:38px; float: left;">
+			<legend>Colors:</legend>
+			<form id="colorsForm">
+			<select name="atrs" id="selcolor" style="width:90%;font-size:10px;">
+			<option>Select here</option>
+		</select>
+		</form>
+		</fieldset>
+		<fieldset style="width:170px;height:38px;float: left;">		
+		<legend>Element size:</legend>
+			<div class="slider">
+				<input type="range" name="price-min" id="resize" value="15" min="1" max="50" style="width:150px;">
+			</div>
+		</fieldset>
+		<fieldset style="width:170px;height:38px;float: left;">		
+		<legend>Opacity:</legend>
+			<div class="slider">
+				<input type="range" name="transparencySlider" id="trans" value="80" min="1" max="100" style="width:150px;">
+			</div>
+		</fieldset>
+		<fieldset style="width:170px;height:38px;float:left;">		
+		<legend>Force(collide):</legend>
+			<div class="slider">
+				<input type="range" name="collisionSlider" id="collision" value="1" min="0" max="1" step="0.01" style="width:150px;">
+			</div>
+		</fieldset>
+		<fieldset style="width:170px;height:30px;float:left;">		
+			<legend>RadViz Visualization</legend>
+			<input type="button" id="render" value="Render!" style="width: 100px;">
+		</fieldset>
+		<fieldset style="width:170px;height:30px;float:left;">		
+			<legend>Silhouette</legend>
+			<input type="button" id="silhouette" value="Get values" style="width: 100px;">
+		</fieldset>
+		</div>
+	</div>
+	<div id="black" class="black"></div>
+	<div id="sampleQuery" class="sampleQuery">
+		<p style=" font: 15px arial, sans-serif;text-align: center;margin-top:0px;margin-bottom:0px">Samples</p>
+		<table id='sampleTable' class="table-1">
+			<tr id='tableStates'></tr>
+		</table>
+		<input type="button" class="button" id="queryClose" value="Close" style="width: 66px;position:fixed;right:7%;bottom:2%;">
+	</div>
+<script>
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////// Global variables
+	var data;
+	var dimensions;
+	var description;
+	var labelset = [];
+	var idxdata = [];
+	var names;
+	var colors;
+	var colorLabel;
+	var dsbalance;
+	var colorsUniques;
+	var regularRadviz;
+	var resize_ratio = 1;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////// File manangement 
+	
+	function sparseToDense(data) {			// Convert a sparse matrix in a dense matrix
+		var newdata = [];
+		
+		for (var i=0;i<data.length;i++){
+			newdata[i] = new Array(dimensions.length+1).fill(0);		// All values equals zero
+			newdata[i][0] = data[i][0];
+			newdata[i][dimensions.length+1] = data[i][data[i].length-1];
+			for (var j=1;j<data[i].length-1;j++)
+				newdata[i][+data[i][j].slice(0,data[i][j].search(":"))+1] = +data[i][j].slice(data[i][j].search(":")+1,data[i][j].length);		
+		}
+		dimensions.splice(0, 0, "Identifier");
+		dimensions.push("Class");
+		return newdata;	
+	}
+	
+	function isAPIAvailable() {
+      if (window.File && window.FileReader && window.FileList && window.Blob) {
+        return true;
+      } else {
+        document.writeln('The HTML5 APIs used in this form are only available in the following browsers:<br />');
+        document.writeln(' - Google Chrome: 13.0 or later<br />');
+        document.writeln(' - Mozilla Firefox: 6.0 or later<br />');
+        document.writeln(' - Internet Explorer: Not supported (partial support expected in 10.0)<br />');
+        document.writeln(' - Safari: Not supported<br />');
+        document.writeln(' - Opera: Not supported');
+        return false;
+      }
+    }
+	$(document).ready(function() {
+		if(isAPIAvailable()) {
+			$('#files').bind('change', handleFileSelect);
+			$('#lrdata').bind('change', openDataFile);
+		}
+	});
+	
+	function handleFileSelect(evt) {
+      var files = evt.target.files; // FileList object
+      var file = files[0];
+      printTable(file);
+    }
+	
+	function openDataFile(evt) {
+      var files = evt.target.files; // FileList object
+      var file = files[0];
+      openTable(file);
+    }
+	
+    function printTable(file) {
+      var reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function(event){
+        var csv = event.target.result;
+        data = $.csv.toArrays(csv);
+		dimensions = data[0];		// Storing dimensions labels
+		data.splice(0,1);				// Cutting data (only values now)
+		for (var i = 0;i<data.length;i++){			// Test if the matrix is dense or sparse
+			if (data[i].length != dimensions.length){
+				data = sparseToDense(data);
+				break;			
+			}		
+		}
+		
+		
+		updateFormsList(dimensions);
+		//regularData = data;
+	//	radvizSetup(44);		
+		}
+	}
+	
+	function openTable(file) {
+        var reader = new FileReader();
+		reader.readAsText(file);
+		reader.onload = function(event){
+        var data = event.target.result;
+        description = processData(data);
+		}
+	}
+	
+	function processData(text){
+		var result;
+		result = $.parseJSON($(text).find("coeffs").text());
+		return result;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////// Utils
+	transpose = function(a) {		  
+	  var w = a.length ? a.length : 0,						// Calculate the width and height of the Array
+		h = a[0] instanceof Array ? a[0].length : 0;
+	 
+	  if(h === 0 || w === 0) { return []; }			 // In case it is a zero matrix, no transpose routine needed.
+
+	  var i, j, t = [];		  
+	  for(i=0; i<h; i++) {			// Loop through every item in the outer array (height)
+		t[i] = [];			// Insert a new row (array)
+		
+		for(j=0; j<w; j++) {			// Loop through every item per item in outer array (width)
+		  t[i][j] = a[j][i];			// Save transposed data.
+		}
+	  }
+	  return t;
+	}
+	
+	function eucDistance(a, b) {		// euclidian distance between two vectors
+			return a
+				.map((x, i) => Math.abs( x - b[i] ) ** 2) // square the difference
+				.reduce((sum, now) => sum + now) // sum
+				** (1/2)
+	}
+	Array.prototype.max = function() {
+	  return Math.max.apply(null, this);
+	};
+
+	Array.prototype.min = function() {
+	  return Math.min.apply(null, this);
+	};
+	
+	const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;  //compute the average of an array
+	
+	function normalize_array(arr) {		// normalize arrays
+
+	  normalize = function(val, max, min) { 
+		return(val - min) / (max - min); 
+	  }
+
+	  max = Math.max.apply(null, arr) 
+	  min = Math.min.apply(null, arr)
+
+	  hold_normed_values=[]
+	  arr.forEach(function(this_num) {
+		hold_normed_values.push(normalize(this_num, max, min))
+	  })
+	  return(hold_normed_values)
+	}
+	
+	function getAllSlhouette(){
+		var normalizeDT = true;
+		// clonning the original data
+		var localData = data.slice();
+		//transposing for del cat attrs
+		localData = transpose(localData);
+		
+		//removing the label
+		localData.splice(colorLabel,1);
+		
+		
+		//looking for cat attrs and deleting
+		for (var i=0;i<localData.length;i++){
+			if (localData[i].some(isNaN)){
+				localData.splice(i,1);
+				i--;
+				}				
+		}	
+		//normalize
+		if (normalizeDT){
+			for (var i=0;i<localData.length;i++)
+				localData[i]=normalize_array(localData[i]);	
+		}
+					
+		//transposing back
+		localData = transpose(localData);	
+		var res1 = getSilhouette(localData);
+		
+		var res2 = regularRadviz.getSilhouette();
+		
+		return [res1, res2];	
+	};
+	
+	function getSilhouette(arraydata){
+			var a_i_vector = [];
+			var b_i_averages = [];
+			var counter = [];
+			var b_i = 0;
+			var a_i = 0;
+			var sum = 0;
+
+			for (var i=0;i<arraydata.length;i++){
+				b_i_averages = new Array(colorsUniques.length).fill(0);
+				counter = new Array(colorsUniques.length).fill(0);
+				a_i_vector = [];
+				// calcs b_i
+				for (var j=0;j<arraydata.length;j++)
+					if ((colors[i] != colors[j]) && (j!=i)){						
+						b_i_averages[colors[j]] += eucDistance(arraydata[i],arraydata[j]);
+						counter[colors[j]] += 1;
+					}
+					
+					for (var w=0;w<b_i_averages.length;w++)
+						if (counter[w] == 0){
+							
+							b_i_averages.splice(w,1);
+							counter.splice(w,1);
+						}			
+							
+					for (var w=0;w<b_i_averages.length;w++)
+							b_i_averages[w] = b_i_averages[w]/counter[w];					
+					
+					
+					b_i = b_i_averages.min();
+				
+				// calcs a_i
+				for (var j=0;j<arraydata.length;j++)
+					if ((colors[i] == colors[j]) && (j!=i))
+						a_i_vector.push(eucDistance(arraydata[i],arraydata[j]))
+					a_i = average(a_i_vector);
+				if ((a_i==0) && (b_i==0)){
+					sum +=0;
+				}
+				else
+					sum += (b_i - a_i)/([a_i,b_i].max());
+			}
+			
+			return sum/arraydata.length;	
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////// HTML Stuff
+	function updateFormsList(dimensions){
+		var html = [];
+		var list = [];
+		list.push(document.getElementById("nameForm"));
+		list.push(document.getElementById("colorsForm"));
+		html.push('<select name="atrs" id="selname" style="width:90%;font-size:10px;">');
+		html.push('<select name="atrs" id="selcolor" style="width:90%;font-size:10px;">');
+
+		html[0] += '<option value=-1>Choose here</option>'
+		html[1] += '<option value=-1>Choose here</option>'
+			for (var i=0;i<dimensions.length;i++){
+				html[0] += '<option value='+i+'>'+dimensions[i].slice(0,24)+'</option>';
+				html[1] += '<option value='+i+'>'+dimensions[i].slice(0,24)+'</option>';
+
+			
+		}
+		list[0].innerHTML = html[0];
+		list[1].innerHTML = html[1];
+	}
+	
+	document.getElementById("nameForm").onchange = function() {
+		var result = transpose(data);
+		names = result[document.getElementById("selname").selectedIndex-1];  //getting the target choosen by the user
+	}
+	
+	document.getElementById("colorsForm").onchange = function() {
+		var result = transpose(data);
+		var colorvalues;
+		var balance;
+		colors = [];
+		colorLabel = document.getElementById("selcolor").selectedIndex-1;
+		colorvalues = result[colorLabel];  //getting the target choosen by the user
+		colorsUniques = colorvalues.filter((v, i, a) => a.indexOf(v) === i);
+		balance = Array(colorsUniques.length).fill(0)
+		
+		for (var i=0;i<colorvalues.length;i++){
+			colors.push(colorsUniques.indexOf(colorvalues[i]));
+			balance[colorsUniques.indexOf(colorvalues[i])] += 1;
+		}
+		//dsbalance = balance;
+	}
+	
+	document.getElementById("resize").onchange = function (){
+		regularRadviz.config({dotSize:document.getElementById("resize").value});
+		regularRadviz.resizeElements(document.getElementById("resize").value);
+    }
+	
+	document.getElementById("trans").onchange = function (){
+		regularRadviz.setTransparency(document.getElementById("trans").value*0.01);
+    }
+	
+	document.getElementById("collision").onchange = function (){
+		regularRadviz.changeForce(document.getElementById("collision").value);
+    }
+	
+	document.getElementById("render").onclick = function (){
+
+		if ((data == undefined)||(description == undefined))
+			alert('Please load the LR and CSV files.');
+		else
+			renderRadViz();
+	}	
+	
+	document.getElementById("queryClose").onclick = function (){  //closing the query of samples
+		document.getElementById("black").style.opacity=0;
+		document.getElementById("black").style.visibility="hidden";
+		document.getElementById("sampleQuery").style.height='0%';
+		document.getElementById("sampleQuery").style.opacity=0;
+		document.getElementById("sampleQuery").style.visibility="hidden";	
+	}
+	
+	document.getElementById("silhouette").onclick = function (){
+		var result;
+		if (regularRadviz == undefined)
+			alert('You should render RadViz before.');
+		else{
+			result = getAllSlhouette();
+			alert('Silhoutte values (tip: decrase force to obtain better results) \nOriginal: '+result[0].toFixed(4)+'\nProjected: '+result[1].toFixed(4));
+			}	
+	}
+	
+	function queryTheseSamples(indexList){
+		
+		var html_ = '';
+		var table = document.getElementById("sampleTable");
+		table.innerHTML = "<tbody><tr id='tableStates'></tr></tbody>";
+		
+		document.getElementById("black").style.visibility="visible";
+		document.getElementById("black").style.opacity=0.7;
+		document.getElementById("sampleQuery").style.visibility="visible";
+		document.getElementById("sampleQuery").style.opacity=1;
+		document.getElementById("sampleQuery").style.height='90%';
+		
+		for (var i=0;i<dimensions.length;i++)
+			html_ += '<td>'+dimensions[i]+'</td>';
+
+		table.insertRow(table.rows.length).innerHTML = html_;		//filling the attributes name
+		
+		html_='';
+		
+		for (var j=0;j<indexList.length;j++){		//filling the samples
+			for (var i=0;i<dimensions.length;i++)
+				html_ += '<td>'+data[indexList[j]][i]+'</td>';
+		
+			table.insertRow(table.rows.length).innerHTML = html_;
+			html_='';
+		}
+	}
+	
+	
+	
+	//////////// Generating the logistic values on the loaded data
+	
+	function newIndex(coeffs, selDimensions, originaldata){
+		var calcIndex = [];
+		var sumCoeffs = [];
+		var aux = 0;
+		
+		for (var i=0;i<originaldata.length;i++){		//Sum of coeffs times values
+			sumCoeffs.push(0);
+			for (var j=0;j<selDimensions.length;j++){
+				sumCoeffs[i] += originaldata[i][dimensions.indexOf(selDimensions[j])]*coeffs[j+1];
+			}
+			sumCoeffs[i] +=	coeffs[0];		
+		}
+		for (var i=0;i<originaldata.length;i++)
+			calcIndex.push(1/(1+Math.exp(-sumCoeffs[i])));
+			
+		return calcIndex;
+	}
+	
+	function bulidIdxData(originaldata, lrdetails){
+		var result = [];
+		
+		for (var i=0;i<lrdetails.length;i++)
+			result.push(newIndex(lrdetails[i].coeffs,lrdetails[i].attribs, originaldata));		
+		
+		return transpose(result);	
+	}
+	
+	function toObject(data, keys, labelnames, size) {
+		var i = 0, k = 0,
+			obj = null,
+			result = [];
+
+		for (i = 0; i < data.length; i++) {
+			obj = {};
+			obj['elemSize'] = size[i];
+			obj['Name'] = labelnames[i];
+			obj['id_'] = i;
+
+			for (k = 0; k < keys.length; k++)				
+				obj[keys[k]] = data[i][k];
+
+			result.push(obj);
+		}
+		return result;
+	}
+	
+	function getLabelSet(lrdetails){
+		var result = [];
+		for (var i=0;i<lrdetails.length;i++)
+			result.push(lrdetails[i].label);
+		return result;	
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////// Rendering the radviz
+	
+	function renderRadViz(){	
+	
+		//bulding the values with the LR data
+		idxdata = bulidIdxData(data,description);
+		labelset = getLabelSet(description);
+		
+		// if no names set yet
+		if (names == undefined)
+			names = Array(data.length).fill('Item');
+			
+		// if no colors set yet
+		if ((colors == undefined)||(colors.length<1)){
+			colors = Array(data.length).fill(0);
+			colorsUniques = [0];
+			}
+			
+		if (dsbalance == undefined)
+			dsbalance = Array(labelset.length).fill(1);
+			
+		//transforming in objectos to sendo to the radviz component
+		idxdata = toObject(idxdata, labelset, names, Array(data.length).fill(0.08));
+		
+		//getting the ratio to adjust the screen
+		resize_ratio = (document.getElementById("radvizdiv").clientWidth - 118)/550;
+		
+		//init the radviz
+		regularRadviz = radvizRegular()				// Updating radviz settings
+				.config({
+					el: document.querySelector('.container'),
+					dimensions: labelset,
+					allDimensions: labelset,
+					dbBalance: dsbalance,
+					colors: colors,
+					labelSet: colorsUniques,
+					size: resize_ratio*550,
+					infoPanelSub: 1.2*resize_ratio*310,
+					infoPanelLeft: resize_ratio*550 - 160,
+					arcwidth1: 5.5*resize_ratio,
+					arcwidth2: 10*resize_ratio,
+					dataSize: data.length,
+					mainCicleStroke: 1.5*resize_ratio,
+				});
+		
+		regularRadviz.render(idxdata, true);
+	}
+	
+</script>
+</body>
+</html>
