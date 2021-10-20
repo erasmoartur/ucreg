@@ -1,4 +1,5 @@
-# An Approach to Explore Logistic Regression Models
+# User-centered Regression
+## An Approach to Explore Logistic Regression Models
 This tool applies the potential of Attribute-RadViz in identifying correlations levels of attributes to explore LR models. We focus on reducing the limitations of using those models in multidimensional data contexts. 
 
 The tool includes the following aspects:
